@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>وادي الراحة — التزلج في سانت كاترين</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --night:#020810;--deep:#050f22;--mid:#0a1a38;
+  --ice:#4fc3f7;--glacier:#00bcd4;--frost:#b3e5fc;
+  --snow:#e8f4ff;--gold:#ffd54f;--warm:#ff8f00;
+  --text:#e8f4ff;--muted:#78909c;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--text);overflow-x:hidden;}
+
+/* SNOW */
+#snowCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
+
+/* NAVBAR */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 6%;
+  background:rgba(2,8,16,0.6);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(79,195,247,0.12);
+  transition:all 0.4s ease;
+}
+nav.scrolled{background:rgba(2,8,16,0.95);padding:10px 6%;}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--frost);}
+.logo-icon{
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(135deg,var(--ice),var(--glacier));
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 0 24px rgba(79,195,247,0.5);
+}
+.nav-logo h1{font-size:1.4rem;font-weight:900;letter-spacing:.5px;}
+.nav-logo span{font-size:.72rem;font-weight:300;color:var(--ice);display:block;margin-top:-4px;}
+.nav-links{display:flex;align-items:center;gap:32px;list-style:none;}
+.nav-links a{color:var(--frost);text-decoration:none;font-weight:500;font-size:.95rem;transition:color .2s;position:relative;}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;right:0;width:0;height:2px;background:var(--ice);border-radius:2px;transition:width .25s;}
+.nav-links a:hover{color:var(--ice);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{
+  background:linear-gradient(135deg,var(--ice),var(--glacier));
+  color:var(--night);border:none;padding:10px 24px;border-radius:50px;
+  font-weight:700;font-size:.9rem;font-family:'Tajawal',sans-serif;cursor:pointer;
+  transition:all .25s;box-shadow:0 4px 20px rgba(79,195,247,0.35);
+}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(79,195,247,0.55);}
+
+/* HERO */
+.hero{position:relative;height:100vh;min-height:700px;overflow:hidden;}
+.hero-slides{position:absolute;inset:0;}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease;}
+.hero-slide.active{opacity:1;}
+.hero-slide img{width:100%;height:100%;object-fit:cover;animation:kenBurns 9s ease-in-out forwards;}
+@keyframes kenBurns{
+  0%{transform:scale(1.1) translate(1%,1%);}
+  100%{transform:scale(1) translate(0%,0%);}
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(2,8,16,0.85) 0%,rgba(2,8,16,0.55) 55%,rgba(2,8,16,0.3) 100%);
+}
+.hero-overlay-btm{
+  position:absolute;bottom:0;left:0;right:0;height:35%;
+  background:linear-gradient(to top,var(--night),transparent);
+}
+.hero-content{
+  position:relative;z-index:10;height:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 8%;padding-top:80px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(79,195,247,0.12);border:1px solid rgba(79,195,247,0.28);
+  color:var(--ice);font-size:.82rem;font-weight:600;
+  padding:6px 16px;border-radius:50px;margin-bottom:24px;width:fit-content;
+  animation:fadeDown .8s ease .2s both;
+}
+.badge-dot{width:6px;height:6px;background:var(--ice);border-radius:50%;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+.hero-title{
+  font-size:clamp(3rem,6vw,5.5rem);font-weight:900;line-height:1.05;
+  margin-bottom:20px;animation:fadeDown .8s ease .4s both;
+}
+.gradient-text{
+  background:linear-gradient(135deg,var(--ice) 0%,var(--glacier) 40%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-slogan{
+  font-size:clamp(1rem,1.8vw,1.3rem);font-weight:300;
+  color:rgba(230,244,255,.8);max-width:520px;line-height:1.8;
+  margin-bottom:40px;animation:fadeDown .8s ease .6s both;
+}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;animation:fadeDown .8s ease .8s both;}
+.btn-ice{
+  background:linear-gradient(135deg,var(--ice),var(--glacier));
+  color:var(--night);border:none;padding:14px 36px;border-radius:50px;
+  font-weight:700;font-size:1rem;font-family:'Tajawal',sans-serif;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  box-shadow:0 4px 24px rgba(79,195,247,0.4);transition:all .25s;
+}
+.btn-ice:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(79,195,247,0.65);}
+.btn-ghost{
+  background:transparent;color:var(--frost);
+  border:1.5px solid rgba(79,195,247,0.35);
+  padding:14px 36px;border-radius:50px;font-weight:600;font-size:1rem;
+  font-family:'Tajawal',sans-serif;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  transition:all .25s;
+}
+.btn-ghost:hover{border-color:var(--ice);color:var(--ice);background:rgba(79,195,247,.08);}
+.hero-dots{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:10;
+}
+.hero-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.25);cursor:pointer;transition:all .3s;
+}
+.hero-dot.active{width:28px;border-radius:4px;background:var(--ice);}
+.scroll-ind{
+  position:absolute;bottom:36px;right:8%;
+  display:flex;flex-direction:column;align-items:center;gap:8px;z-index:10;
+  animation:fadeIn 1s ease 1.5s both;
+}
+.scroll-ind span{font-size:.72rem;color:rgba(255,255,255,.4);letter-spacing:2px;writing-mode:vertical-rl;}
+.scroll-line{width:1px;height:60px;background:linear-gradient(to bottom,var(--ice),transparent);animation:scrollPulse 2s ease-in-out infinite;}
+@keyframes scrollPulse{0%,100%{transform:scaleY(1);opacity:1;}50%{transform:scaleY(.4);opacity:.3;}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* SECTIONS */
+section{padding:100px 8%;position:relative;}
+.section-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(79,195,247,.08);border:1px solid rgba(79,195,247,.18);
+  color:var(--ice);font-size:.78rem;font-weight:700;
+  padding:4px 14px;border-radius:50px;margin-bottom:16px;
+  letter-spacing:1px;text-transform:uppercase;
+}
+.section-title{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:900;margin-bottom:14px;line-height:1.2;}
+.section-title span{color:var(--ice);}
+.section-sub{color:var(--muted);font-size:1.05rem;max-width:480px;line-height:1.8;}
+
+/* GAME */
+.game-section{background:linear-gradient(to bottom,var(--night),var(--deep));text-align:center;}
+.game-wrapper{
+  position:relative;background:rgba(5,15,34,.85);
+  border:1px solid rgba(79,195,247,.18);border-radius:24px;
+  padding:28px;margin-top:48px;overflow:hidden;
+}
+.game-wrapper::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 100%,rgba(79,195,247,.05),transparent 70%);
+  pointer-events:none;
+}
+.game-hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:0 8px;}
+.hud-item{text-align:center;}
+.hud-label{font-size:.72rem;color:var(--muted);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;}
+.hud-val{font-size:1.7rem;font-weight:900;color:var(--ice);font-variant-numeric:tabular-nums;line-height:1.1;margin-top:4px;}
+#gameCanvas{display:block;width:100%;height:auto;border-radius:12px;cursor:pointer;border:1px solid rgba(79,195,247,.1);}
+.game-hint{
+  margin-top:18px;display:flex;align-items:center;justify-content:center;
+  gap:16px;color:var(--muted);font-size:.88rem;flex-wrap:wrap;
+}
+.key-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.2);
+  border-radius:8px;padding:4px 12px;color:var(--ice);font-weight:700;
+}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.img-mosaic{
+  display:grid;grid-template-columns:1fr 1fr;
+  grid-template-rows:200px 200px;gap:10px;border-radius:20px;overflow:hidden;
+}
+.img-mosaic img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+.img-mosaic:hover img{transform:scale(1.05);}
+.img-mosaic .tall{grid-row:span 2;}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;}
+.stat-box{
+  text-align:center;padding:20px 12px;
+  background:rgba(79,195,247,.05);border:1px solid rgba(79,195,247,.1);
+  border-radius:16px;
+}
+.stat-num{font-size:2rem;font-weight:900;color:var(--ice);}
+.stat-lbl{font-size:.82rem;color:var(--muted);margin-top:4px;}
+
+/* SERVICES */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:48px;}
+.svc-card{
+  background:linear-gradient(135deg,rgba(10,26,56,.85),rgba(5,15,34,.7));
+  border:1px solid rgba(79,195,247,.1);border-radius:20px;padding:34px 26px;
+  transition:all .3s;position:relative;overflow:hidden;
+}
+.svc-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--ice),var(--glacier));
+  transform:scaleX(0);transform-origin:right;transition:transform .35s;
+}
+.svc-card:hover{transform:translateY(-8px);border-color:rgba(79,195,247,.3);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.svc-card:hover::before{transform:scaleX(1);transform-origin:left;}
+.svc-icon{
+  width:58px;height:58px;border-radius:16px;
+  background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.2);
+  display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:22px;
+}
+.svc-card h3{font-size:1.15rem;font-weight:700;margin-bottom:10px;color:var(--frost);}
+.svc-card p{color:var(--muted);font-size:.93rem;line-height:1.75;}
+
+/* GALLERY */
+.gallery-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  grid-template-rows:220px 220px;gap:10px;margin-top:48px;
+  border-radius:20px;overflow:hidden;
+}
+.gal-item{position:relative;overflow:hidden;cursor:pointer;}
+.gal-item:nth-child(1){grid-column:span 2;grid-row:span 2;}
+.gal-item:nth-child(4){grid-column:span 2;}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+.gal-item:hover img{transform:scale(1.08);}
+.gal-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(2,8,16,.85),transparent 55%);
+  opacity:0;transition:opacity .3s;
+  display:flex;align-items:flex-end;padding:18px;
+}
+.gal-item:hover .gal-overlay{opacity:1;}
+.gal-overlay span{font-size:.88rem;font-weight:600;color:var(--frost);}
+
+/* CTA */
+.cta-section{text-align:center;padding:100px 8%;position:relative;overflow:hidden;}
+.cta-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(79,195,247,.09),transparent 65%);
+  pointer-events:none;
+}
+.cta-section h2{font-size:clamp(2rem,4vw,3.5rem);font-weight:900;margin-bottom:18px;}
+.cta-section p{color:var(--muted);font-size:1.05rem;max-width:480px;margin:0 auto 40px;line-height:1.8;}
+
+/* FOOTER */
+footer{background:rgba(2,8,16,.95);border-top:1px solid rgba(79,195,247,.08);padding:64px 8% 30px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:48px;}
+.footer-brand h3{font-size:1.4rem;font-weight:900;margin-bottom:12px;color:var(--frost);}
+.footer-brand p{color:var(--muted);font-size:.88rem;line-height:1.75;max-width:270px;}
+.footer-col h4{font-size:.95rem;font-weight:700;color:var(--frost);margin-bottom:18px;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:10px;}
+.footer-col ul li a{color:var(--muted);text-decoration:none;font-size:.88rem;transition:color .2s;}
+.footer-col ul li a:hover{color:var(--ice);}
+.footer-bottom{border-top:1px solid rgba(79,195,247,.07);padding-top:28px;display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{color:var(--muted);font-size:.82rem;}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .75s ease,transform .75s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.1s;}.d2{transition-delay:.2s;}.d3{transition-delay:.3s;}.d4{transition-delay:.4s;}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:12px 5%;}
+  .nav-links{display:none;}
+  section{padding:64px 5%;}
+  .about-grid{grid-template-columns:1fr;gap:36px;}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto;}
+  .gal-item:nth-child(1){grid-column:span 2;}
+  .gal-item:nth-child(4){grid-column:auto;}
+  .footer-grid{grid-template-columns:1fr;gap:36px;}
+  .footer-bottom{flex-direction:column;gap:10px;text-align:center;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .hero-title{font-size:2.8rem;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="snowCanvas"></canvas>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">❄️</div>
+    <div>
+      <h1>وادي الراحة</h1>
+      <span>سانت كاترين — سيناء</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">عن الوادي</a></li>
+    <li><a href="#services">خدماتنا</a></li>
+    <li><a href="#gallery">الصور</a></li>
+    <li><a href="#game">العب معنا</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">🎿 احجز الآن</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-slides" id="heroSlides">
+    <div class="hero-slide active">
+      <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=1920&q=85&fit=crop" alt="تزلج في الجبال">
+    </div>
+    <div class="hero-slide">
+      <img src="https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=1920&q=85&fit=crop" alt="جبال سانت كاترين">
+    </div>
+    <div class="hero-slide">
+      <img src="https://images.unsplash.com/photo-1478827217976-7214a0556393?w=1920&q=85&fit=crop" alt="التزلج على الجليد">
+    </div>
+    <div class="hero-slide">
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85&fit=crop" alt="قمم جبلية ثلجية">
+    </div>
+    <div class="hero-slide">
+      <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1920&q=85&fit=crop" alt="جبال سيناء">
+    </div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-overlay-btm"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      سانت كاترين • سيناء • مصر
+    </div>
+    <h1 class="hero-title">وادي<br><span class="gradient-text">الراحة</span></h1>
+    <p class="hero-slogan">استمتع بتجربة التزلج الفريدة في سانت كاترين — حيث يلتقي جمال جبال سيناء بنقاء الجليد في رحلة لا تُنسى أبداً</p>
+    <div class="hero-btns">
+      <a href="#cta" class="btn-ice">🎿 احجز رحلتك</a>
+      <a href="#gallery" class="btn-ghost">📸 شاهد الصور</a>
+    </div>
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
+  <div class="scroll-ind">
+    <div class="scroll-line"></div>
+    <span>اكتشف</span>
+  </div>
+</section>
+
+<!-- GAME -->
+<section class="game-section" id="game">
+  <div class="section-tag">🎮 العب واستمتع</div>
+  <h2 class="section-title">تزلّج معنا <span>الآن</span></h2>
+  <p class="section-sub" style="margin:0 auto;text-align:center;">تحدَّ نفسك في لعبة التزلج — تجنّب العقبات واحصل على أعلى نقطة</p>
+  <div class="game-wrapper">
+    <div class="game-hud">
+      <div class="hud-item">
+        <div class="hud-label">النقاط</div>
+        <div class="hud-val" id="scoreDisplay">0</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label" style="font-size:1rem;">❄️ وادي الراحة ❄️</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">لعبة التزلج الجبلي</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">أعلى نقطة</div>
+        <div class="hud-val" id="highScoreDisplay">0</div>
+      </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="game-hint">
+      <div class="key-chip">⎵ مسافة</div>
+      <span>أو</span>
+      <div class="key-chip">↑ سهم</div>
+      <span>للقفز — قفزتان متتاليتان مسموح بهما</span>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" style="background:linear-gradient(to bottom,var(--deep),var(--night));">
+  <div class="about-grid">
+    <div class="img-mosaic reveal">
+      <img class="tall" src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=500&q=80&fit=crop" alt="جبال سانت كاترين">
+      <img src="https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=500&q=80&fit=crop" alt="تزلج">
+      <img src="https://images.unsplash.com/photo-1491466424936-e304919aada7?w=500&q=80&fit=crop" alt="ثلج">
+    </div>
+    <div class="reveal d2">
+      <div class="section-tag">🏔️ من نحن</div>
+      <h2 class="section-title">وجهة التزلج <span>الأولى</span> في مصر</h2>
+      <p class="section-sub">وادي الراحة هو منتجع التزلج الأول في سيناء، يجمع بين روعة قمم جبال سانت كاترين الشامخة وطبيعة الجليد البكر، ليقدم تجربة فريدة في قلب شبه الجزيرة العربية. بيئة آمنة، مدربون محترفون، ومناظر تسرق الأنفاس.</p>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num">15+</div>
+          <div class="stat-lbl">سنة خبرة</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">50K</div>
+          <div class="stat-lbl">زائر سعيد</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">2600م</div>
+          <div class="stat-lbl">فوق البحر</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" style="background:var(--night);">
+  <div class="reveal">
+    <div class="section-tag">🎿 خدماتنا</div>
+    <h2 class="section-title">كل ما تحتاجه لـ<span>رحلتك</span></h2>
+    <p class="section-sub">نوفر تجربة متكاملة من أول لحظة وصولك حتى آخر لحظة مغادرتك</p>
+  </div>
+  <div class="services-grid">
+    <div class="svc-card reveal d1">
+      <div class="svc-icon">🎿</div>
+      <h3>دروس التزلج</h3>
+      <p>مدربون محترفون معتمدون دولياً لكل المستويات — من المبتدئ حتى الاحترافي — في أجواء آمنة ومرحة.</p>
+    </div>
+    <div class="svc-card reveal d2">
+      <div class="svc-icon">🏨</div>
+      <h3>إقامة جبلية فاخرة</h3>
+      <p>كبائن وشاليهات خشبية دافئة فوق ارتفاع 2600 متر مع إطلالات بانورامية خلابة على قمم سيناء.</p>
+    </div>
+    <div class="svc-card reveal d3">
+      <div class="svc-icon">🛡️</div>
+      <h3>معدات ومعايير السلامة</h3>
+      <p>أحدث معدات التزلج للإيجار مع فريق سلامة متخصص يرافقك في كل لحظة.</p>
+    </div>
+    <div class="svc-card reveal d1">
+      <div class="svc-icon">🚌</div>
+      <h3>نقل مريح</h3>
+      <p>خدمة نقل فاخرة من القاهرة وشرم الشيخ وطابا مباشرةً إلى قلب الوادي.</p>
+    </div>
+    <div class="svc-card reveal d2">
+      <div class="svc-icon">🍲</div>
+      <h3>مطعم جبلي</h3>
+      <p>أشهى الأطباق الشرقية تُقدَّم أمام نيران الموقد في أجواء جبلية دافئة لا مثيل لها.</p>
+    </div>
+    <div class="svc-card reveal d3">
+      <div class="svc-icon">📸</div>
+      <h3>جلسات تصوير</h3>
+      <p>مصور محترف يوثّق أجمل لحظاتك على الثلج بصور تبقى في الذاكرة إلى الأبد.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" style="background:var(--deep);">
+  <div class="reveal">
+    <div class="section-tag">📸 معرض الصور</div>
+    <h2 class="section-title">لحظات <span>لا تُنسى</span></h2>
+    <p class="section-sub">شاهد جمال وادي الراحة من عيون ضيوفنا السعداء</p>
+  </div>
+  <div class="gallery-grid reveal">
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=900&q=80&fit=crop" alt="تزلج">
+      <div class="gal-overlay"><span>التزلج على القمم</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=500&q=80&fit=crop" alt="جبال">
+      <div class="gal-overlay"><span>جبال سيناء</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1491466424936-e304919aada7?w=500&q=80&fit=crop" alt="ثلج">
+      <div class="gal-overlay"><span>الثلج الطبيعي</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=900&q=80&fit=crop" alt="منظر">
+      <div class="gal-overlay"><span>المنظر البانورامي</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=500&q=80&fit=crop" alt="تزلج">
+      <div class="gal-overlay"><span>دروس التزلج</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="cta-glow"></div>
+  <div class="reveal">
+    <div class="section-tag">🎿 احجز الآن</div>
+    <h2 class="section-title">رحلتك إلى <span>وادي الراحة</span> تبدأ هنا</h2>
+    <p>سارع بالحجز قبل اكتمال المقاعد — تجربة التزلج المصرية الأولى تنتظرك!</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="tel:+20000000000" class="btn-ice">📞 اتصل بنا الآن</a>
+      <a href="https://wa.me/20000000000" class="btn-ghost">💬 واتساب</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>❄️ وادي الراحة</h3>
+      <p>وجهة التزلج الأولى في مصر — حيث تلتقي مغامرة الجبل بنقاء الثلج في قلب سانت كاترين، سيناء.</p>
+    </div>
+    <div class="footer-col">
+      <h4>روابط سريعة</h4>
+      <ul>
+        <li><a href="#about">عن الوادي</a></li>
+        <li><a href="#services">خدماتنا</a></li>
+        <li><a href="#gallery">معرض الصور</a></li>
+        <li><a href="#game">العب معنا</a></li>
+        <li><a href="#cta">الحجز</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>تواصل معنا</h4>
+      <ul>
+        <li><a href="#">📞 +20 XXX XXX XXXX</a></li>
+        <li><a href="#">📧 info@wadi-raha.com</a></li>
+        <li><a href="#">📍 سانت كاترين، جنوب سيناء</a></li>
+        <li><a href="#">💬 واتساب</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 وادي الراحة — جميع الحقوق محفوظة</p>
+    <p style="color:rgba(120,144,156,.4);">صُنع بـ ❄️ في مصر</p>
+  </div>
+</footer>
+
+<script>
+/* ===== SNOW SYSTEM ===== */
+const SC = document.getElementById('snowCanvas');
+const sc = SC.getContext('2d');
+let SW,SH;
+function rsz(){SC.width=SW=innerWidth;SC.height=SH=innerHeight;}
+rsz();addEventListener('resize',rsz);
+class Flake{
+  constructor(){this.reset(true);}
+  reset(top){
+    this.x=Math.random()*SW;
+    this.y=top?Math.random()*-120:Math.random()*SH;
+    this.r=Math.random()*3+.5;
+    this.spd=Math.random()*1.2+.35;
+    this.wind=(Math.random()-.5)*.7;
+    this.alpha=Math.random()*.55+.18;
+    this.wb=Math.random()*Math.PI*2;
+    this.wbSpd=(Math.random()-.5)*.025;
+  }
+  step(){
+    this.wb+=this.wbSpd;
+    this.x+=this.wind+Math.sin(this.wb)*.5;
+    this.y+=this.spd;
+    if(this.y>SH+12||this.x<-12||this.x>SW+12)this.reset(false);
+  }
+  draw(){
+    sc.save();sc.globalAlpha=this.alpha;
+    sc.fillStyle='#d9eeff';
+    sc.shadowColor='#93c5fd';sc.shadowBlur=this.r*2.5;
+    sc.beginPath();sc.arc(this.x,this.y,this.r,0,Math.PI*2);sc.fill();
+    sc.restore();
+  }
+}
+const flakes=[];for(let i=0;i<200;i++)flakes.push(new Flake());
+(function animSnow(){
+  sc.clearRect(0,0,SW,SH);
+  flakes.forEach(f=>{f.step();f.draw();});
+  requestAnimationFrame(animSnow);
+})();
+
+/* ===== HERO SLIDER ===== */
+const slides=document.querySelectorAll('.hero-slide');
+const dotsWrap=document.getElementById('heroDots');
+let cur=0,sliderTimer;
+slides.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='hero-dot'+(i===0?' active':'');
+  d.onclick=()=>goTo(i);
+  dotsWrap.appendChild(d);
+});
+function goTo(n){
+  slides[cur].classList.remove('active');
+  document.querySelectorAll('.hero-dot')[cur].classList.remove('active');
+  cur=n;
+  slides[cur].classList.add('active');
+  document.querySelectorAll('.hero-dot')[cur].classList.add('active');
+  const img=slides[cur].querySelector('img');
+  img.style.animation='none';img.offsetHeight;img.style.animation='kenBurns 9s ease-in-out forwards';
+  clearInterval(sliderTimer);sliderTimer=setInterval(()=>goTo((cur+1)%slides.length),6000);
+}
+sliderTimer=setInterval(()=>goTo((cur+1)%slides.length),6000);
+
+/* ===== NAVBAR SCROLL ===== */
+addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>70));
+
+/* ===== SCROLL REVEAL ===== */
+const revEls=document.querySelectorAll('.reveal');
+const revObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.12});
+revEls.forEach(el=>revObs.observe(el));
+
+/* ===== SKIING GAME ===== */
+const gc=document.getElementById('gameCanvas');
+const ctx=gc.getContext('2d');
+const GW=920,GH=240;
+gc.width=GW;gc.height=GH;
+
+const GROUND=172;
+const GRAV=0.62;
+const J1=-14;const J2=-11.5;
+
+let gs='idle',score=0,hi=0,spd=5,fc=0;
+let obs=[],ptcls=[],bgX1=0,bgX2=0,bgX3=0,nextObs=95;
+
+const skier={
+  x:125,y:GROUND,vy:0,jc:0,ground:true,af:0,trail:[],
+  jump(){
+    if(this.jc<2){
+      this.vy=this.jc===0?J1:J2;this.jc++;this.ground=false;
+      for(let i=0;i<10;i++)ptcls.push({x:this.x+16,y:GROUND,vx:(Math.random()-.5)*3.5,vy:-(Math.random()*3.5+1),life:1,sz:Math.random()*2.5+1});
+    }
+  },
+  update(){
+    if(!this.ground){this.vy+=GRAV;this.y+=this.vy;}
+    if(this.y>=GROUND){this.y=GROUND;this.vy=0;this.jc=0;this.ground=true;}
+    if(this.ground){this.trail.push({x:this.x+16,y:this.y+50});if(this.trail.length>28)this.trail.shift();}
+    else this.trail=[];
+    this.af++;
+  },
+  draw(){
+    const bx=this.x,by=this.y,air=!this.ground;
+    if(this.trail.length>1){
+      ctx.save();ctx.strokeStyle='rgba(147,210,255,.28)';ctx.lineWidth=2.5;ctx.lineCap='round';
+      ctx.beginPath();this.trail.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+      ctx.stroke();ctx.restore();
+    }
+    ctx.save();ctx.translate(bx+16,by+50);
+    if(air)ctx.rotate(-.18);else ctx.rotate(.04+Math.sin(this.af*.14)*.02);
+    /* skis */
+    ctx.strokeStyle='#29b6f6';ctx.lineWidth=3.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-22,0);ctx.quadraticCurveTo(-12,-2,20,0);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-20,5);ctx.quadraticCurveTo(-10,3,22,5);ctx.stroke();
+    /* ski tip highlight */
+    ctx.strokeStyle='rgba(178,235,242,.55)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(15,0);ctx.lineTo(20,-1);ctx.stroke();
+    /* boots */
+    ctx.fillStyle='#1a237e';ctx.fillRect(-5,-6,10,7);ctx.fillRect(7,-5,9,6);
+    /* legs */
+    ctx.strokeStyle='#1565c0';ctx.lineWidth=5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-2,-5);ctx.lineTo(-4,-22);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(8,-4);ctx.lineTo(6,-22);ctx.stroke();
+    /* body */
+    const bl=air?-5:0;
+    ctx.fillStyle='#1976d2';ctx.beginPath();ctx.roundRect(-9+bl,-46,18,25,3);ctx.fill();
+    ctx.fillStyle='#29b6f6';ctx.fillRect(-9+bl,-38,18,4);
+    /* poles */
+    ctx.strokeStyle='#90caf9';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(9+bl,-42);ctx.lineTo(24,-33);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(24,-33);ctx.lineTo(26,-8);ctx.stroke();
+    ctx.beginPath();ctx.arc(26,-8,3,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-9+bl,-42);ctx.lineTo(-24,-33);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-24,-33);ctx.lineTo(-27,-8);ctx.stroke();
+    ctx.beginPath();ctx.arc(-27,-8,3,0,Math.PI*2);ctx.stroke();
+    /* helmet */
+    ctx.fillStyle='#0d47a1';ctx.beginPath();ctx.arc(bl*.5,-54,11,0,Math.PI*2);ctx.fill();
+    /* visor */
+    ctx.fillStyle='#ff8f00';ctx.beginPath();ctx.arc(bl*.5,-54,7,-.4,Math.PI+.4);ctx.fill();
+    /* scarf */
+    ctx.fillStyle='#ef5350';ctx.beginPath();ctx.roundRect(-9+bl,-43,18,5,2);ctx.fill();
+    ctx.restore();
+  },
+  bounds(){return{x:this.x+5,y:this.y+3,w:22,h:47};}
+};
+
+class Obs{
+  constructor(tp){
+    this.tp=tp;this.x=GW+60;
+    if(tp==='tree'){this.w=38;this.h=72;this.y=GROUND-14;}
+    else if(tp==='rock'){this.w=44;this.h=22;this.y=GROUND+30;}
+    else{this.w=30;this.h=54;this.y=GROUND+1;}
+  }
+  move(s){this.x-=s;}
+  gone(){return this.x<-90;}
+  draw(){
+    ctx.save();
+    if(this.tp==='tree'){
+      const bx=this.x,by=this.y;
+      /* shadow */ctx.fillStyle='rgba(0,0,0,.12)';ctx.beginPath();ctx.ellipse(bx+18,GROUND+52,15,4,0,0,Math.PI*2);ctx.fill();
+      /* trunk */ctx.fillStyle='#4e342e';ctx.fillRect(bx+14,by-14,8,18);
+      const clrs=['#1b5e20','#2e7d32','#388e3c'];
+      const ys=[by-74,by-55,by-38];const ws=[13,17,21];
+      for(let i=0;i<3;i++){
+        ctx.fillStyle='rgba(0,0,0,.1)';ctx.beginPath();ctx.moveTo(bx+18,ys[i]+2);ctx.lineTo(bx+18-ws[i]-2,ys[i]+22+2);ctx.lineTo(bx+18+ws[i]+2,ys[i]+22+2);ctx.closePath();ctx.fill();
+        ctx.fillStyle=clrs[i];ctx.beginPath();ctx.moveTo(bx+18,ys[i]);ctx.lineTo(bx+18-ws[i],ys[i]+22);ctx.lineTo(bx+18+ws[i],ys[i]+22);ctx.closePath();ctx.fill();
+        ctx.fillStyle='rgba(215,238,255,.82)';ctx.beginPath();ctx.moveTo(bx+18,ys[i]);ctx.lineTo(bx+18-ws[i]*.5,ys[i]+11);ctx.lineTo(bx+18+ws[i]*.5,ys[i]+11);ctx.closePath();ctx.fill();
+      }
+    } else if(this.tp==='rock'){
+      const bx=this.x,by=this.y;
+      ctx.fillStyle='rgba(0,0,0,.12)';ctx.beginPath();ctx.ellipse(bx+20,by+5,22,5,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#546e7a';ctx.beginPath();ctx.moveTo(bx+2,by);ctx.lineTo(bx+42,by);ctx.lineTo(bx+38,by-18);ctx.lineTo(bx+7,by-21);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#78909c';ctx.beginPath();ctx.moveTo(bx+6,by-4);ctx.lineTo(bx+36,by-4);ctx.lineTo(bx+32,by-20);ctx.lineTo(bx+10,by-21);ctx.closePath();ctx.fill();
+      ctx.fillStyle='rgba(215,238,255,.72)';ctx.beginPath();ctx.moveTo(bx+10,by-21);ctx.quadraticCurveTo(bx+21,by-28,bx+32,by-20);ctx.quadraticCurveTo(bx+24,by-24,bx+16,by-22);ctx.closePath();ctx.fill();
+    } else {
+      const bx=this.x+15,by=this.y;
+      ctx.fillStyle='rgba(0,0,0,.1)';ctx.beginPath();ctx.ellipse(bx,by+6,17,4,0,0,Math.PI*2);ctx.fill();
+      [{y:by-6,r:15,f:'#eceff1'},{y:by-28,r:10,f:'#f5f5f5'},{y:by-45,r:8,f:'#fafafa'}].forEach(b=>{
+        ctx.fillStyle=b.f;ctx.strokeStyle='#b0bec5';ctx.lineWidth=.8;
+        ctx.beginPath();ctx.arc(bx,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.stroke();
+      });
+      /* eyes */ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(bx-3,by-47,1.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(bx+3,by-47,1.5,0,Math.PI*2);ctx.fill();
+      /* nose */ctx.fillStyle='#ef6c00';ctx.beginPath();ctx.moveTo(bx,by-45);ctx.lineTo(bx+8,by-44);ctx.lineTo(bx,by-44.5);ctx.closePath();ctx.fill();
+      /* buttons */ctx.fillStyle='#1a237e';[-21,-28,-35].forEach(d=>{ctx.beginPath();ctx.arc(bx,by+d,1.5,0,Math.PI*2);ctx.fill();});
+      /* scarf */ctx.fillStyle='#c62828';ctx.fillRect(bx-11,by-37,22,4);ctx.fillStyle='#ef5350';ctx.fillRect(bx-11,by-37,22,2);
+      /* arms */ctx.strokeStyle='#5d4037';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bx-10,by-28);ctx.lineTo(bx-22,by-36);ctx.stroke();ctx.beginPath();ctx.moveTo(bx+10,by-28);ctx.lineTo(bx+22,by-36);ctx.stroke();
+      /* hat */ctx.fillStyle='#1a237e';ctx.fillRect(bx-9,by-58,18,3);ctx.fillRect(bx-7,by-72,14,15);ctx.fillStyle='#ef5350';ctx.fillRect(bx-7,by-61,14,3);
+    }
+    ctx.restore();
+  }
+  bounds(){
+    if(this.tp==='tree')return{x:this.x+8,y:this.y-72,w:20,h:86};
+    if(this.tp==='rock')return{x:this.x+4,y:this.y-21,w:36,h:21};
+    return{x:this.x+3,y:this.y-54,w:24,h:60};
+  }
+}
+
+function drawBG(){
+  /* sky */const sg=ctx.createLinearGradient(0,0,0,GH);
+  sg.addColorStop(0,'#020a1a');sg.addColorStop(.55,'#0a1628');sg.addColorStop(1,'#0d1f3c');
+  ctx.fillStyle=sg;ctx.fillRect(0,0,GW,GH);
+  /* stars */
+  ctx.fillStyle='rgba(170,210,255,.65)';
+  for(let i=0;i<35;i++){
+    const sx=(i*137.5+bgX3*.04)%GW,sy=(i*41)%72;
+    ctx.beginPath();ctx.arc(sx,sy,i%3===0?1.5:.7,0,Math.PI*2);ctx.fill();
+  }
+  /* far mtns */
+  ctx.fillStyle='#0f2744';
+  bgX3=(bgX3+(gs==='playing'?.25:0))%GW;
+  const mX=[0,50,130,190,260,340,420,500,580,660,740,830];
+  const mH=[65,95,78,115,88,72,105,90,68,98,82,60];
+  ctx.beginPath();ctx.moveTo(0,148);
+  for(let i=0;i<mX.length;i++){
+    const rx=(mX[i]-bgX3+GW*2)%GW;
+    ctx.lineTo(rx,148-mH[i%mH.length]);ctx.lineTo(rx+58,148);
+  }
+  ctx.lineTo(GW,148);ctx.lineTo(GW,GH);ctx.lineTo(0,GH);ctx.closePath();ctx.fill();
+  /* snow caps far */
+  ctx.fillStyle='rgba(210,232,255,.16)';
+  for(let i=0;i<mX.length;i++){
+    const rx=(mX[i]-bgX3+GW*2)%GW,h=mH[i%mH.length];
+    ctx.beginPath();ctx.moveTo(rx,148-h);ctx.lineTo(rx-8,148-h+20);ctx.lineTo(rx+8,148-h+20);ctx.closePath();ctx.fill();
+  }
+  /* mid mtns */
+  ctx.fillStyle='#0d2035';
+  bgX2=(bgX2+(gs==='playing'?.7:0))%GW;
+  const m2X=[0,70,148,210,290,370,450,530,610,690,780,870];
+  const m2H=[42,72,52,84,62,46,78,57,36,66,52,70];
+  ctx.beginPath();ctx.moveTo(0,160);
+  for(let i=0;i<m2X.length;i++){
+    const rx=(m2X[i]-bgX2+GW*2)%GW;
+    ctx.lineTo(rx,160-m2H[i%m2H.length]);ctx.lineTo(rx+48,160);
+  }
+  ctx.lineTo(GW,160);ctx.lineTo(GW,GH);ctx.lineTo(0,GH);ctx.closePath();ctx.fill();
+  /* snow ground */
+  const snowG=ctx.createLinearGradient(0,GROUND+50,0,GH);
+  snowG.addColorStop(0,'#c5e3f7');snowG.addColorStop(.3,'#b3d9f0');snowG.addColorStop(1,'#9ec8e8');
+  ctx.fillStyle=snowG;ctx.fillRect(0,GROUND+50,GW,GH-(GROUND+50));
+  /* bumpy surface */
+  bgX1=(bgX1+(gs==='playing'?spd:0))%60;
+  ctx.fillStyle='#cce8f8';
+  ctx.beginPath();ctx.moveTo(0,GROUND+50);
+  for(let x=0;x<=GW;x+=30){ctx.lineTo(x,GROUND+50+Math.sin((x+bgX1)*.12)*3.5);}
+  ctx.lineTo(GW,GH);ctx.lineTo(0,GH);ctx.closePath();ctx.fill();
+  /* ice track shine */
+  ctx.fillStyle='rgba(140,205,255,.3)';ctx.fillRect(0,GROUND+50,GW,5);
+  ctx.strokeStyle='rgba(200,235,255,.25)';ctx.lineWidth=1;
+  for(let i=0;i<GW;i+=90){const lx=(i-bgX1*2+GW*2)%GW;ctx.beginPath();ctx.moveTo(lx,GROUND+51);ctx.lineTo(lx+45,GROUND+51);ctx.stroke();}
+}
+
+function drawOverlay(title,sub){
+  ctx.save();
+  ctx.fillStyle='rgba(2,8,22,.78)';ctx.beginPath();ctx.roundRect(GW/2-210,GH/2-62,420,124,18);ctx.fill();
+  ctx.strokeStyle='rgba(79,195,247,.35)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='#e8f4ff';ctx.font='bold 27px Tajawal,sans-serif';ctx.textAlign='center';ctx.fillText(title,GW/2,GH/2-10);
+  ctx.fillStyle='rgba(147,197,253,.72)';ctx.font='15px Tajawal,sans-serif';ctx.fillText(sub,GW/2,GH/2+26);
+  ctx.restore();
+}
+
+function hitTest(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+
+function resetGame(){
+  fc=0;score=0;spd=5;obs=[];ptcls=[];
+  skier.y=GROUND;skier.vy=0;skier.jc=0;skier.ground=true;skier.trail=[];
+  nextObs=95;
+}
+
+(function loop(){
+  drawBG();
+  if(gs==='idle'){
+    skier.af++;skier.y=GROUND+Math.sin(Date.now()*.004)*3;skier.trail=[];skier.draw();
+    drawOverlay('❄️ وادي الراحة','انقر أو اضغط مسافة / ↑ للبدء');
+  } else if(gs==='playing'){
+    fc++;score=Math.floor(fc/6);spd=Math.min(5+Math.floor(score/70)*.6,15);
+    document.getElementById('scoreDisplay').textContent=score;
+    nextObs--;if(nextObs<=0){
+      const tp=['tree','rock','snowman','tree','tree'][Math.floor(Math.random()*5)];
+      obs.push(new Obs(tp));
+      nextObs=Math.floor(Math.random()*50+72-Math.min(score/90,38));
+    }
+    obs.forEach(o=>o.move(spd));obs=obs.filter(o=>!o.gone());
+    obs.forEach(o=>o.draw());
+    skier.update();skier.draw();
+    /* particles */
+    ptcls=ptcls.filter(p=>p.life>0);
+    ptcls.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life-=.05;ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle='#b3e5fc';ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);ctx.fill();ctx.restore();});
+    /* speed lines */
+    if(spd>9){ctx.strokeStyle='rgba(147,210,255,.06)';ctx.lineWidth=1;for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(0,GROUND+54+i*5);ctx.lineTo(GW,GROUND+54+i*5);ctx.stroke();}}
+    /* collision */
+    const sb=skier.bounds();
+    for(const o of obs){if(hitTest(sb,o.bounds())){gs='dead';if(score>hi){hi=score;document.getElementById('highScoreDisplay').textContent=hi;}for(let i=0;i<22;i++)ptcls.push({x:skier.x+15,y:skier.y+25,vx:(Math.random()-.5)*9,vy:-(Math.random()*9+2),life:1,sz:Math.random()*4+1});break;}}
+  } else {
+    obs.forEach(o=>o.draw());skier.draw();
+    ptcls=ptcls.filter(p=>p.life>0);
+    ptcls.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life-=.04;ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle='#b3e5fc';ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);ctx.fill();ctx.restore();});
+    drawOverlay('💥 انتهت الرحلة!',`نقاطك: ${score} — انقر للإعادة`);
+  }
+  requestAnimationFrame(loop);
+})();
+
+function act(){
+  if(gs==='idle'){gs='playing';resetGame();}
+  else if(gs==='playing'){skier.jump();}
+  else{gs='playing';resetGame();}
+}
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();act();}});
+gc.addEventListener('click',act);
+gc.addEventListener('touchstart',e=>{e.preventDefault();act();},{passive:false});
+</script>
+</body>
+</html>
